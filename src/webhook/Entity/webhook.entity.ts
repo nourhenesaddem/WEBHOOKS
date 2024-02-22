@@ -27,7 +27,7 @@ export class Webhook {
   organizationId: number; // Adjust the type according to your database schema
 
   @ManyToOne(() => User, user => user.webhooks)
-  @JoinColumn({ name: 'organizationId' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
 

@@ -21,6 +21,7 @@ import { Ctx, MessagePattern, Payload, RmqContext } from "@nestjs/microservices"
 import { Webhook } from "./Entity/webhook.entity";
 import { AuthService } from "../auth/auth.service";
 import { JwtAuthGuard } from "../auth/guards/jwt.guard";
+import { LocalGuard } from "../auth/guards/local.guard";
 
 @Controller('webhook')
 export class WebhookController {
@@ -39,70 +40,32 @@ export class WebhookController {
     await this.webhookService.processWebhook(payload);
     return { success: true };
   }
+  //@MessagePattern('WEBHOOK')
+  //getNotifications(@Payload() payload: any , @Ctx() context: RmqContext) {
+  //  console.log( payload );
+  //}
+
   @MessagePattern('WEBHOOK')
-  getNotifications(@Payload() payload: any , @Ctx() context: RmqContext) {
-    console.log( payload );
+  async getNotifications(@Payload() payload: any, @Ctx() context: RmqContext) {
+    console.log(payload);
+    await this.webhookService.handleWebhook(payload);
+    // Acknowledge the message once processed
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    channel.ack(originalMsg);
   }
   @Get()
   async getAll() {
     return this.webhookService.getAll();
   }
-  //@Post('add')
-  ////@UseGuards(AuthGuard())
-  //async create(@Body() createWebhookDto: CreateWebhookDto) {
-  //  return this.webhookService.create(createWebhookDto);
-  //}
-
-
 
   @Post('add')
+  //@UseGuards(LocalGuard)
   async create(@Body() createWebhookDto: CreateWebhookDto, @Req() request: Request) {
     const organizationId = request['organizationId']; // Retrieve organizationId from the request object
     return this.webhookService.create({ ...createWebhookDto, organizationId });
   }
 
-
-  //@Post('add')
-  //async create(
-  //  @Body() createWebhookDto: CreateWebhookDto,
-  //  @Headers('authorization') authHeader: string,
-  //) {
-  //  const organizationId = this.extractOrganizationIdFromHeader(authHeader);
-  //  if (!organizationId) {
-  //    throw new UnauthorizedException('Invalid authorization header');
-  //  }
-  //  return this.webhookService.create({ ...createWebhookDto, organizationId: +organizationId });
-  //  // Convert organizationId to a number using the '+' operator or parseInt()
-  //}
-//
-  //private extractOrganizationIdFromHeader(authHeader: string): string | null {
-  //  if (!authHeader) {
-  //    return null;
-  //  }
-  //  const token = authHeader.split(' ')[1];
-  //  const decodedToken = this.authService.decodeToken(token);
-  //  // Assuming your decoded token contains organizationId as a number
-  //  return decodedToken.organizationId.toString(); // Convert it to string if it's a number
-  //}
-  //@Post('add')
-  //async create(
-  //  @Body() createWebhookDto: CreateWebhookDto,
-  //  @Headers('authorization') authHeader: string,
-  //  @Req() request: Request,
-  //) {
-  //  const organizationId = this.extractOrganizationIdFromHeader(authHeader);
-  //  return this.webhookService.create({ ...createWebhookDto, organizationId });
-  //}
-//
-  //private extractOrganizationIdFromHeader(authHeader: string): string | null {
-  //  if (!authHeader) {
-  //    return null;
-  //  }
-  //  const token = authHeader.split(' ')[1];
-  //  const decodedToken = this.authService.decodeToken(token);
-  //  // Assuming your decoded token contains organizationId
-  //  return decodedToken.organizationId || null;
-  //}
   @Get(':organizationId')
   async getWebhooksByUserId(@Param('organizationId') organizationId: number): Promise<Webhook[]> {
     return this.webhookService.findByOrgId(organizationId);
