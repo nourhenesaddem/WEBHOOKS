@@ -25,7 +25,7 @@ export class WebhookService {
     const webhooks = await this.webhookRepository.find();
     console.log(webhooks);
     for (const webhook of webhooks) {
-      if ( webhook.organizationId === organizationId && webhook.events === eventType ) {
+      if ( webhook.events === eventType ) {
         await this.sendHttpRequest(webhook.endpointUrl, payload);
       }
     }
