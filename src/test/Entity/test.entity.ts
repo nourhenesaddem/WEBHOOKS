@@ -7,6 +7,5 @@ export class Test {
   id: number;
   @Column()
   title: string;
-  @OneToMany(() => Webhook, webhook => webhook.user)
-  webhooks: Webhook[];
+
 }

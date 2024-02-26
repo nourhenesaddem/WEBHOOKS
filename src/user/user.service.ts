@@ -5,6 +5,7 @@ import { User } from "./entities/user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { FindOneOptions, Repository } from "typeorm";
 import * as bcrypt from 'bcrypt';
+import { Webhook } from "../webhook/Entity/webhook.entity";
 
 @Injectable()
 export class UserService {
@@ -25,6 +26,7 @@ export class UserService {
   async findById(userId: number): Promise<User | null> {
     return await this.userRepository.findOne({ where: { userId } });
   }
+
   async findOne(condition: any): Promise<User> {
     return await this.userRepository.findOne(condition);
   }

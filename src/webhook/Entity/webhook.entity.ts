@@ -23,12 +23,11 @@ export class Webhook {
     enum: Events })
   events: Events;
 
-  @Column() // Define organizationId column
-  organizationId: number; // Adjust the type according to your database schema
+  @Column()
+  organizationId: number;
 
   @ManyToOne(() => User, user => user.webhooks)
   @JoinColumn({ name: 'userId' })
   user: User;
-
 
 }

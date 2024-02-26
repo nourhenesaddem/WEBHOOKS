@@ -6,12 +6,14 @@ import { UpdateData } from './dto/update.data';
 import { Repository } from 'typeorm';
 import axios from 'axios';
 import { User } from "../user/entities/user.entity";
+import { UserService } from "../user/user.service";
 
 @Injectable()
 export class WebhookService {
   constructor(
     @InjectRepository(Webhook)
-    private readonly webhookRepository: Repository<Webhook>) {}
+    private readonly webhookRepository: Repository<Webhook>,
+    private readonly userService: UserService) {}
 
   async getAll(): Promise<Webhook[]> {
     return this.webhookRepository.find();
@@ -20,16 +22,16 @@ export class WebhookService {
     // Process the incoming data
     console.log('Received webhook data:', payload);
   }
-  async handleWebhook(payload: any): Promise<void> {
-    const { organizationId, eventType } = payload;
-    const webhooks = await this.webhookRepository.find();
-    console.log(webhooks);
-    for (const webhook of webhooks) {
-      if ( webhook.events === eventType ) {
-        await this.sendHttpRequest(webhook.endpointUrl, payload);
-      }
-    }
-  }
+  //async handleWebhook(payload: any): Promise<void> {
+  //  const { organizationId, eventType } = payload;
+  //  const webhooks = await this.webhookRepository.find({ where: { organizationId: organizationId } });
+  //  console.log(webhooks);
+  //  for (const webhook of webhooks) {
+  //    if ( webhook.organizationId === organizationId ) {
+  //      await this.sendHttpRequest(webhook.endpointUrl, payload);
+  //    }
+  //  }
+  //}
 
   //async handleWebhook(payload: any): Promise<void> {
   //  const { organizationId, eventType } = payload;
@@ -41,6 +43,41 @@ export class WebhookService {
   //    }
   //  }
   //}
+
+  async handleWebhook(payload: any): Promise<void> {
+    try {
+      const { organizationId, eventType } = payload;
+      //console.log("Payload:", payload);
+
+      const webhooks = await this.webhookRepository.find({ where: { organizationId: organizationId } });
+      console.log("*** Webhooks:", webhooks);
+
+      for (const webhook of webhooks) {
+        console.log("*** Checking webhook:", webhook);
+        if (webhook.organizationId === organizationId) {
+          console.log(`*** Step 1 : sending HTTP request to ${webhook.endpointUrl} for organizationId ${organizationId}`);
+
+        if (webhook.events === eventType) {
+          console.log(`*** Sending HTTP request to ${webhook.endpointUrl} for event ${eventType}`);
+          await this.sendHttpRequest(webhook.endpointUrl, payload);
+        }
+        }
+      }
+
+      //for (const webhook of webhooks) {
+      //  // Ensure the organizationId values are of the same type and compare them
+      //  if (webhook.organizationId === organizationId) {
+      //    // Process the webhook if organizationId matches
+      //    console.log(`Sending HTTP request to ${webhook.endpointUrl} for event ${organizationId}`);
+      //    await this.sendHttpRequest(webhook.endpointUrl, payload);
+      //  }
+      //}
+    } catch (error) {
+      console.error("Error handling webhook:", error);
+      // Handle error appropriately, such as logging or throwing further
+    }
+  }
+
   private async sendHttpRequest(url: string, data: any): Promise<void> {
     try {
       await axios.post(url, data);
@@ -58,6 +95,7 @@ export class WebhookService {
     // Save the webhook to the database
     return await this.webhookRepository.save(webhook);
   }
+
   async findByOrgId(organizationId: number): Promise<Webhook[]> {
     return this.webhookRepository.find({ where: { id: organizationId } });
   }
@@ -88,10 +126,6 @@ export class WebhookService {
     return result;
   }
 
-  /*findByUserId*/
-  async findByUserId(userId: number): Promise<Webhook[]> {
-    return this.webhookRepository.find({ where: { user: { userId } } });
-  }
 
 
 
