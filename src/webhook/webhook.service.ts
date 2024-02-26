@@ -22,61 +22,50 @@ export class WebhookService {
     // Process the incoming data
     console.log('Received webhook data:', payload);
   }
-  //async handleWebhook(payload: any): Promise<void> {
-  //  const { organizationId, eventType } = payload;
-  //  const webhooks = await this.webhookRepository.find({ where: { organizationId: organizationId } });
-  //  console.log(webhooks);
-  //  for (const webhook of webhooks) {
-  //    if ( webhook.organizationId === organizationId ) {
-  //      await this.sendHttpRequest(webhook.endpointUrl, payload);
-  //    }
-  //  }
-  //}
-
-  //async handleWebhook(payload: any): Promise<void> {
-  //  const { organizationId, eventType } = payload;
-  //  const webhooks = await this.webhookRepository.find({ where: { organizationId: organizationId } });
-  //  console.log(webhooks);
-  //  for (const webhook of webhooks) {
-  //    if (webhook.events === eventType ) {
-  //      await this.sendHttpRequest(webhook.endpointUrl, payload);
-  //    }
-  //  }
-  //}
 
   async handleWebhook(payload: any): Promise<void> {
     try {
-      const { organizationId, eventType } = payload;
-      //console.log("Payload:", payload);
+      const { eventData, eventType } = payload;
 
-      const webhooks = await this.webhookRepository.find({ where: { organizationId: organizationId } });
+      const webhooks = await this.webhookRepository.find();
       console.log("*** Webhooks:", webhooks);
 
       for (const webhook of webhooks) {
-        console.log("*** Checking webhook:", webhook);
-        if (webhook.organizationId === organizationId) {
-          console.log(`*** Step 1 : sending HTTP request to ${webhook.endpointUrl} for organizationId ${organizationId}`);
-
-        if (webhook.events === eventType) {
-          console.log(`*** Sending HTTP request to ${webhook.endpointUrl} for event ${eventType}`);
+        if (webhook.orgId === eventData.organizationId && webhook.events === eventType) {
+          console.log("*** Checking webhook:", webhook);
+          console.log(`*** Sending HTTP request to ${webhook.endpointUrl} for orgId : ${eventData.organizationId} event ${eventType}`);
           await this.sendHttpRequest(webhook.endpointUrl, payload);
         }
-        }
       }
-
-      //for (const webhook of webhooks) {
-      //  // Ensure the organizationId values are of the same type and compare them
-      //  if (webhook.organizationId === organizationId) {
-      //    // Process the webhook if organizationId matches
-      //    console.log(`Sending HTTP request to ${webhook.endpointUrl} for event ${organizationId}`);
-      //    await this.sendHttpRequest(webhook.endpointUrl, payload);
-      //  }
-      //}
     } catch (error) {
       console.error("Error handling webhook:", error);
       // Handle error appropriately, such as logging or throwing further
     }
   }
+
+
+  //async handleWebhook(payload: any): Promise<void> {
+  //  try {
+  //    const { organizationId, eventType } = payload;
+  //    //console.log("Payload:", payload);
+  //
+  //    const webhooks = await this.webhookRepository.find({ where: { orgId: organizationId } });
+  //    console.log("*** Webhooks:", webhooks);
+  //
+  //    for (const webhook of webhooks) {
+  //      console.log("*** Checking webhook:", webhook);
+  //
+  //      if (webhook.events === eventType) {
+  //        console.log(`*** Sending HTTP request to ${webhook.endpointUrl} for event ${eventType}`);
+  //        await this.sendHttpRequest(webhook.endpointUrl, payload);
+  //      }
+  //    }
+  //
+  //  } catch (error) {
+  //    console.error("Error handling webhook:", error);
+  //    // Handle error appropriately, such as logging or throwing further
+  //  }
+  //}
 
   private async sendHttpRequest(url: string, data: any): Promise<void> {
     try {
@@ -90,7 +79,7 @@ export class WebhookService {
 
     // Ensure organizationId is a numeric value if it's meant to be the foreign key
     const webhook = new Webhook();
-    webhook.organizationId = organizationId;
+    webhook.orgId = organizationId;
     Object.assign(webhook, rest);
     // Save the webhook to the database
     return await this.webhookRepository.save(webhook);

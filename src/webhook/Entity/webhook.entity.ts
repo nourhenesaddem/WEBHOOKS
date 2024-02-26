@@ -24,7 +24,7 @@ export class Webhook {
   events: Events;
 
   @Column()
-  organizationId: number;
+  orgId: number;
 
   @ManyToOne(() => User, user => user.webhooks)
   @JoinColumn({ name: 'userId' })
