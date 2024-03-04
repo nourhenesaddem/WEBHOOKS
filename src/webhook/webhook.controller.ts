@@ -22,6 +22,7 @@ import { Webhook } from "./Entity/webhook.entity";
 import { AuthService } from "../auth/auth.service";
 import { JwtAuthGuard } from "../auth/guards/jwt.guard";
 import { LocalGuard } from "../auth/guards/local.guard";
+import { Events } from "./dto/events";
 
 @Controller('webhook')
 export class WebhookController {
@@ -49,10 +50,6 @@ export class WebhookController {
   async getNotifications(@Payload() payload: any, @Ctx() context: RmqContext) {
     console.log(payload);
     await this.webhookService.handleWebhook(payload);
-    // Acknowledge the message once processed
-    const channel = context.getChannelRef();
-    const originalMsg = context.getMessage();
-    channel.ack(originalMsg);
   }
   @Get()
   async getAll() {
@@ -70,7 +67,6 @@ export class WebhookController {
   async getWebhooksByUserId(@Param('organizationId') organizationId: number): Promise<Webhook[]> {
     return this.webhookService.findByOrgId(organizationId);
   }
-
 
   @Get(':id')
   async getById(@Param('id') id: number) {
@@ -90,6 +86,5 @@ export class WebhookController {
   async delete(@Param('id') id: number): Promise<any> {
     return this.webhookService.delete(id);
   }
-
 
 }

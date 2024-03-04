@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice(AppModule, {
+  const RMQapp = await NestFactory.createMicroservice(AppModule, {
     transport: Transport.RMQ,
     options: {
       urls: ['amqp://localhost:5672'],
@@ -13,11 +13,7 @@ async function bootstrap() {
       },
     },
   });
-
-  /*app.listen(() => {
-    console.log('Microservice is connected to RabbitMQ');
-  });*/
-  await app.listen();
+  await RMQapp.listen();
   console.log('Microservice is connected to RabbitMQ');
 
 }

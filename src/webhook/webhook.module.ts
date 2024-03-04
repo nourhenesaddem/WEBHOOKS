@@ -11,6 +11,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { AuthModule } from "../auth/auth.module";
 import { AuthService } from "../auth/auth.service";
 import { UserModule } from "../user/user.module";
+import { EventsController } from "./events.controller";
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { UserModule } from "../user/user.module";
     TestService,
     AuthService,
   ],
-  controllers: [WebhookController],
+  controllers: [WebhookController,EventsController],
 
 })
 export class WebhookModule implements NestModule{

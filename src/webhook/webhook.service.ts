@@ -26,7 +26,6 @@ export class WebhookService {
   async handleWebhook(payload: any): Promise<void> {
     try {
       const { eventData, eventType } = payload;
-
       const webhooks = await this.webhookRepository.find();
       console.log("*** Webhooks:", webhooks);
 
@@ -115,13 +114,22 @@ export class WebhookService {
     return result;
   }
 
+  async getEnumValues(): Promise<string[]> {
+      const webhooks = await this.webhookRepository.find();
+      return webhooks.map(webhook => webhook.events);
+  }
+
+
+
+  //getEventEnumValues(): string[] {
+  //  // Retrieve the events enum values from the database or any other data source
+  //  // Example: return enum values stored in an array
+  //  return ['Event1', 'Event2', 'Event3'];
+  //}
 
 
 
 }
-
-
-
 
   //async createWebhook(createWebhookDto: CreateWebhookDto): Promise<Webhook> {
   //  // Transform the DTO object into a format expected by webhookRepository.create
