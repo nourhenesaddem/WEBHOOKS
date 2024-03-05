@@ -30,7 +30,7 @@ export class WebhookService {
       console.log("*** Webhooks:", webhooks);
 
       for (const webhook of webhooks) {
-        if (webhook.orgId === eventData.organizationId && webhook.events === eventType) {
+        if (webhook.orgId === eventData.organizationId && webhook.events && webhook.events.includes(eventType)) {
           console.log("*** Checking webhook:", webhook);
           console.log(`*** Sending HTTP request to ${webhook.endpointUrl} for orgId : ${eventData.organizationId} event ${eventType}`);
           await this.sendHttpRequest(webhook.endpointUrl, payload);
@@ -114,10 +114,10 @@ export class WebhookService {
     return result;
   }
 
-  async getEnumValues(): Promise<string[]> {
-      const webhooks = await this.webhookRepository.find();
-      return webhooks.map(webhook => webhook.events);
-  }
+  //async getEnumValues(): Promise<string[]> {
+  //    const webhooks = await this.webhookRepository.find();
+  //    return webhooks.map(webhook => webhook.events);
+  //}
 
 
 
